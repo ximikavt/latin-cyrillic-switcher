@@ -11,203 +11,34 @@ import {
 } from 'electron';
 import path from 'path';
 import Store from 'electron-store';
-import { execSync } from 'child_process';
 
-// Type definitions
-interface AppConfig {
-  enabled: boolean;
-  hotkey: string;
-}
-
-interface ConvertResult {
-  success: boolean;
-  converted?: string;
-}
-
-interface ConfigResult {
-  success: boolean;
-}
-
-// Character mapping types
-type CharacterMapping = Record<string, string>;
+import { AppConfig, ConvertResult, ConfigResult, DEFAULT_CONFIG } from './types';
+import { convertText } from './converter';
+import { getSelectedText, pasteText } from './systemUtils';
 
 // Store configuration
 const store = new Store<AppConfig>({
-  defaults: {
-    enabled: true,
-    hotkey: 'Shift+Cmd+L',
-  },
-});
-
-// Latin to Cyrillic mapping
-const latinToCyrillic: CharacterMapping = {
-  // Row 1 (top row numbers/symbols)
-  '`': 'ґ',
-  '~': 'Ґ',
-  '!': '!',
-  '@': '"',
-  '#': '№',
-  '$': ';',
-  '%': '%',
-  '^': ':',
-  '&': '?',
-  '*': '*',
-  '(': '(',
-  ')': ')',
-
-  // Row 2 (QWERTY row)
-  q: 'й',
-  w: 'ц',
-  e: 'у',
-  r: 'к',
-  t: 'е',
-  y: 'н',
-  u: 'г',
-  i: 'ш',
-  o: 'щ',
-  p: 'з',
-  '[': 'х',
-  ']': 'ї',
-  Q: 'Й',
-  W: 'Ц',
-  E: 'У',
-  R: 'К',
-  T: 'Е',
-  Y: 'Н',
-  U: 'Г',
-  I: 'Ш',
-  O: 'Щ',
-  P: 'З',
-  '{': 'Х',
-  '}': 'Ї',
-
-  // Row 3 (ASDFGH row)
-  a: 'ф',
-  s: 'і',
-  d: 'в',
-  f: 'а',
-  g: 'п',
-  h: 'р',
-  j: 'о',
-  k: 'л',
-  l: 'д',
-  ';': 'ж',
-  "'": 'є',
-  A: 'Ф',
-  S: 'І',
-  D: 'В',
-  F: 'А',
-  G: 'П',
-  H: 'Р',
-  J: 'О',
-  K: 'Л',
-  L: 'Д',
-  ':': 'Ж',
-  '"': 'Є',
-
-  // Row 4 (ZXCVBN row)
-  z: 'я',
-  x: 'ч',
-  c: 'с',
-  v: 'м',
-  b: 'и',
-  n: 'т',
-  m: 'ь',
-  ',': 'б',
-  '.': 'ю',
-  '/': '.',
-  Z: 'Я',
-  X: 'Ч',
-  C: 'С',
-  V: 'М',
-  B: 'И',
-  N: 'Т',
-  M: 'Ь',
-  '<': 'Б',
-  '>': 'Ю',
-  '?': '.',
-
-  // Special characters
-  '\\': '\\',
-  '|': '|',
-};
-
-// Create reverse mapping for Cyrillic to Latin
-const cyrillicToLatin: CharacterMapping = {};
-Object.entries(latinToCyrillic).forEach(([latin, cyrillic]: [string, string]) => {
-  cyrillicToLatin[cyrillic] = latin;
+  defaults: DEFAULT_CONFIG,
 });
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
 /**
- * Convert text between Latin and Cyrillic
+ * Get current configuration
  */
-function convertText(text: string): string {
-  return text
-    .split('')
-    .map((char: string): string => {
-      if (latinToCyrillic[char]) {
-        return latinToCyrillic[char];
-      } else if (cyrillicToLatin[char]) {
-        return cyrillicToLatin[char];
-      }
-      return char;
-    })
-    .join('');
-}
-
-/**
- * Get selected text from active application using AppleScript
- */
-function getSelectedText(): string {
-  try {
-    const script = `
-      tell application "System Events"
-        keystroke "c" using command down
-        delay 0.1
-      end tell
-      
-      tell application "System Events"
-        get the clipboard
-      end tell
-    `;
-
-    const result: string = execSync(`osascript -e '${script.replace(/'/g, "'\\''")}'`, {
-      encoding: 'utf8',
-    });
-    return result;
-  } catch (error) {
-    console.error('Error getting selected text:', error);
-    return '';
-  }
-}
-
-/**
- * Set clipboard and paste
- */
-function pasteText(text: string): void {
-  try {
-    clipboard.writeText(text);
-
-    const script = `
-      tell application "System Events"
-        keystroke "v" using command down
-      end tell
-    `;
-
-    execSync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
-  } catch (error) {
-    console.error('Error pasting text:', error);
-  }
+function getConfig(): AppConfig {
+  return {
+    enabled: (store as any).enabled ?? DEFAULT_CONFIG.enabled,
+    hotkey: (store as any).hotkey ?? DEFAULT_CONFIG.hotkey,
+  };
 }
 
 /**
  * Handle hotkey action
  */
 function handleHotkey(): void {
-  const config = store.store as AppConfig;
+  const config = getConfig();
   if (!config.enabled) return;
 
   const selectedText: string = getSelectedText().trim();
@@ -255,10 +86,13 @@ const createConfigWindow = (): void => {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
     },
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.webContents.openDevTools();
+
   mainWindow.once('ready-to-show', () => {
     if (mainWindow) {
       mainWindow.show();
@@ -335,7 +169,7 @@ app.on('ready', () => {
   createTray();
 
   // Register initial hotkey
-  const config = store.store as AppConfig;
+  const config = getConfig();
   registerHotkey(config.hotkey);
 });
 
@@ -358,20 +192,17 @@ app.on('will-quit', () => {
 
 // IPC handlers for configuration
 ipcMain.handle('get-config', async (_event: IpcMainInvokeEvent): Promise<AppConfig> => {
-  const config = store.store as AppConfig;
-  return {
-    enabled: config.enabled,
-    hotkey: config.hotkey,
-  };
+  return getConfig();
 });
 
 ipcMain.handle(
   'save-config',
   async (_event: IpcMainInvokeEvent, config: AppConfig): Promise<ConfigResult> => {
-    const oldHotkey: string = (store.store as AppConfig).hotkey;
+    const currentConfig = getConfig();
+    const oldHotkey: string = currentConfig.hotkey;
 
-    store.set('enabled', config.enabled);
-    store.set('hotkey', config.hotkey);
+    (store as any).enabled = config.enabled;
+    (store as any).hotkey = config.hotkey;
 
     if (config.hotkey !== oldHotkey) {
       registerHotkey(config.hotkey);
