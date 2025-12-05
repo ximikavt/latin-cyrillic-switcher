@@ -65,5 +65,3 @@ jobs:
 
             ### Changes
             See commit history for detailed changes.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
