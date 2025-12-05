@@ -1,0 +1,14 @@
+node_modules/electron-builder
+node_modules/electron-builder-*
+node_modules/.bin
+**/*.d.ts
+**/*.map
+**/test
+**/tests
+**/spec
+**/specs
+**/docs
+**/*.md
+.git
+.gitignore
+*.log

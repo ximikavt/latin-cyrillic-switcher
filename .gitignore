@@ -1,0 +1,52 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+out/
+build/
+release/
+*.dmg
+*.zip
+*.AppImage
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon / image sets
+*.iconset
+*.icns
+
+# Logs
+logs/
+*.log
+
+# Env files
+.env
+.env.*
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Temporary files
+tmp/
+*.tmp
+*.swp
+
+# Misc
+coverage/
+.npm/
+
+# Ignore local macOS app artifacts
+*.app
+
+# Ignore generated files from scripts
+assets/*.iconset

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Latin ↔ Cyrillic Converter</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1d1d1f;
+        color: #f5f5f7;
+      }
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 16px;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .container {
+        background: #262626;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    h1 {
+      font-size: 18px;
+      color: #1d1d1f;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      h1 {
+        color: #f5f5f7;
+      }
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .subtitle {
+        color: #a1a1a6;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 4px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      label {
+        color: #f5f5f7;
+      }
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #0071e3;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #d2d2d7;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      background: white;
+      color: #1d1d1f;
+      transition: border-color 0.2s;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      input[type="text"] {
+        background: #424245;
+        color: #f5f5f7;
+        border-color: #515154;
+      }
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+    }
+
+    .info-text {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .info-text {
+        color: #a1a1a6;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    button {
+      flex: 1;
+      padding: 7px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-save {
+      background: #0071e3;
+      color: white;
+    }
+
+    .btn-save:hover {
+      background: #0077ed;
+      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+    }
+
+    .btn-save:active {
+      background: #0062cc;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .btn-save:hover {
+        box-shadow: 0 2px 8px rgba(0, 113, 227, 0.5);
+      }
+    }
+
+    .btn-quit {
+      background: #ff3b30;
+      color: white;
+      border: none;
+    }
+
+    .btn-quit:hover {
+      background: #ff453a;
+      box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+    }
+
+    .btn-quit:active {
+      background: #e63027;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .btn-quit:hover {
+        box-shadow: 0 2px 8px rgba(255, 59, 48, 0.5);
+      }
+    }
+
+    .status-message {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      text-align: center;
+      display: none;
+    }
+
+    .status-success {
+      background: #d1f4d1;
+      color: #2d5016;
+      display: block;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .status-success {
+        background: #1b5e20;
+        color: #b7f3b7;
+      }
+    }
+
+    .status-error {
+      background: #fdd5d5;
+      color: #5c2e2e;
+      display: block;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .status-error {
+        background: #5c2e2e;
+        color: #ffb3b3;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Latin ↔ Cyrillic</h1>
+    <div class="subtitle">Text Converter Configuration</div>
+
+    <form id="configForm">
+      <div class="form-group">
+        <label>
+          <div class="checkbox-group">
+            <input type="checkbox" id="enabledCheckbox" name="enabled">
+            <span>Enable converter</span>
+          </div>
+        </label>
+        <div class="info-text">When disabled, the app will not convert text</div>
+      </div>
+
+      <div class="form-group">
+        <label for="hotkeyInput">Hotkey Combination</label>
+        <input type="text" id="hotkeyInput" name="hotkey" placeholder="e.g., Shift+Cmd+L"
+          title="Enter keyboard hotkey combination to trigger conversion">
+        <div class="info-text">Press this hotkey to convert selected text from Latin to Cyrillic and vice versa</div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn-save">Save</button>
+        <button type="button" class="btn-quit" id="quitBtn">Quit</button>
+      </div>
+
+      <div id="statusMessage" class="status-message"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('configForm');
+    const enabledCheckbox = document.getElementById('enabledCheckbox');
+    const hotkeyInput = document.getElementById('hotkeyInput');
+    const quitBtn = document.getElementById('quitBtn');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // Load configuration on startup
+    async function loadConfig() {
+      try {
+        const config = await window.appAPI.getConfig();
+        enabledCheckbox.checked = config.enabled;
+        hotkeyInput.value = config.hotkey;
+      } catch (error) {
+        console.error('Error loading config:', error);
+        showStatus('Error loading configuration', 'error');
+      }
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        const config = {
+          enabled: enabledCheckbox.checked,
+          hotkey: hotkeyInput.value.trim()
+        };
+
+        if (!config.hotkey) {
+          showStatus('Please enter a hotkey combination', 'error');
+          return;
+        }
+
+        await window.appAPI.saveConfig(config);
+        showStatus('Settings saved successfully!', 'success');
+
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+      } catch (error) {
+        console.error('Error saving config:', error);
+        showStatus('Error saving configuration', 'error');
+      }
+    });
+
+    // Handle quit button
+    quitBtn.addEventListener('click', () => {
+      window.appAPI.quitApp();
+    });
+
+    // Show status message
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message status-${type}`;
+    }
+
+    // Load config when page loads
+    loadConfig();
+  </script>
+</body>
+
+</html>
