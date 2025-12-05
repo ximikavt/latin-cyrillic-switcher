@@ -1,0 +1,69 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build app
+        run: npm run build
+
+      - name: Build DMG
+        run: npm run build:dmg
+        env:
+          # Skip code signing for now
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Get version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}-${{ github.run_number }}
+          name: Latin ↔ Cyrillic v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/Latin ↔ Cyrillic-*.dmg
+            dist/Latin ↔ Cyrillic-*.dmg.blockmap
+          body: |
+            ## Latin ↔ Cyrillic v${{ steps.version.outputs.version }}
+
+            ### Installation
+            1. Download the DMG file below
+            2. Open the DMG
+            3. Drag the app to your Applications folder
+            4. Launch from Applications or menu bar
+
+            ### Changes
+            See commit history for detailed changes.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
