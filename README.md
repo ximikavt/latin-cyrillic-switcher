@@ -2,6 +2,8 @@
 
 A macOS Electron menubar app that converts selected text between Latin and Cyrillic layouts using a configured hotkey combination.
 
+**Built with TypeScript for strong type safety and better developer experience.**
+
 ## Features
 
 - **Menubar App**: Runs in the background with a small icon in the macOS menu bar
@@ -9,12 +11,13 @@ A macOS Electron menubar app that converts selected text between Latin and Cyril
 - **Bidirectional Conversion**: Automatically converts between Latin and Cyrillic layouts
 - **Easy Configuration**: Simple popup window to configure enabled state and hotkey
 - **Works in Any App**: Converts text in browsers, messengers, text editors, and other applications
+- **TypeScript**: Fully typed codebase with strict type checking
 
 ## Installation
 
 ### Prerequisites
 - macOS 10.13 or later
-- Node.js and npm
+- Node.js and npm (TypeScript will be installed automatically)
 
 ### Setup
 
@@ -27,9 +30,21 @@ npm install
 
 ## Running the App
 
-Start the development version:
+### Development mode with TypeScript compilation:
 ```bash
 npm start
+```
+
+This compiles TypeScript to JavaScript and starts the Electron app.
+
+### Development mode with debugging:
+```bash
+npm run dev
+```
+
+### Manual TypeScript compilation:
+```bash
+npm run build:ts
 ```
 
 ## Building for Production
@@ -43,6 +58,8 @@ npm run build:dmg
 ```bash
 npm run build:mac
 ```
+
+The build process automatically compiles TypeScript before packaging.
 
 The built app will be in the `dist/` directory:
 - `latin-cyrillic-switcher.dmg` - Installer for macOS

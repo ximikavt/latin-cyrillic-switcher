@@ -2,17 +2,27 @@
   "name": "latin-cyrillic-switcher",
   "version": "1.0.0",
   "description": "Latin to Cyrillic text converter with hotkey support",
-  "main": "main.js",
+  "main": "dist/main.js",
   "homepage": "./",
   "scripts": {
-    "start": "electron .",
-    "build": "electron-builder",
-    "build:mac": "electron-builder --mac",
-    "build:dmg": "electron-builder --mac dmg"
+    "build:ts": "tsc",
+    "build:scss": "sass src/styles.scss dist/styles.css",
+    "build:copy": "cp index.html dist/index.html",
+    "build": "npm run build:scss && npm run build:ts && npm run build:copy",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron . --inspect=5858",
+    "build:app": "npm run build && electron-builder",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:dmg": "npm run build && electron-builder --mac dmg",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "format": "prettier --write src/**/*.ts index.html"
   },
   "build": {
     "appId": "com.latin-cyrillic.switcher",
-    "productName": "latin-cyrillic-switcher",
+    "productName": "Latin ↔ Cyrillic",
     "mac": {
       "target": [
         "dmg",
@@ -41,19 +51,29 @@
       ]
     },
     "files": [
-      "main.js",
-      "preload.js",
-      "index.html",
+      "dist/",
       "assets/",
       "node_modules/"
     ]
   },
   "dependencies": {
-    "electron-store": "^8.2.0"
+    "electron-store": "^11.0.2"
   },
   "devDependencies": {
-    "electron": "latest",
-    "electron-builder": "latest"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
+    "electron": "^39.2.5",
+    "electron-builder": "^26.0.12",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "jest": "^30.2.0",
+    "prettier": "^3.7.4",
+    "sass": "^1.94.2",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
   },
   "author": "",
   "license": "MIT"
