@@ -22,7 +22,7 @@
   },
   "build": {
     "appId": "com.latin-cyrillic.switcher",
-    "productName": "latin-cyrillic-switcher",
+    "productName": "Latin ↔ Cyrillic",
     "mac": {
       "target": [
         "dmg",
