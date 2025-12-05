@@ -13,7 +13,7 @@
     "dev": "npm run build && electron . --inspect=5858",
     "build:app": "npm run build && electron-builder",
     "build:mac": "npm run build && electron-builder --mac",
-    "build:dmg": "npm run build && electron-builder --mac dmg",
+    "build:dmg": "npm run build && electron-builder --mac dmg --publish never",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "jest",
