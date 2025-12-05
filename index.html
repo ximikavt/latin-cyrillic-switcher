@@ -269,16 +269,16 @@
   </div>
 
   <script>
-    const form = document.getElementById('configForm');
-    const enabledCheckbox = document.getElementById('enabledCheckbox');
-    const hotkeyInput = document.getElementById('hotkeyInput');
-    const quitBtn = document.getElementById('quitBtn');
-    const statusMessage = document.getElementById('statusMessage');
+    const form = document.getElementById('configForm') as HTMLFormElement;
+    const enabledCheckbox = document.getElementById('enabledCheckbox') as HTMLInputElement;
+    const hotkeyInput = document.getElementById('hotkeyInput') as HTMLInputElement;
+    const quitBtn = document.getElementById('quitBtn') as HTMLButtonElement;
+    const statusMessage = document.getElementById('statusMessage') as HTMLDivElement;
 
     // Load configuration on startup
-    async function loadConfig() {
+    async function loadConfig(): Promise<void> {
       try {
-        const config = await window.appAPI.getConfig();
+        const config: AppConfig = await window.appAPI.getConfig();
         enabledCheckbox.checked = config.enabled;
         hotkeyInput.value = config.hotkey;
       } catch (error) {
@@ -288,11 +288,11 @@
     }
 
     // Handle form submission
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e: Event): Promise<void> => {
       e.preventDefault();
 
       try {
-        const config = {
+        const config: AppConfig = {
           enabled: enabledCheckbox.checked,
           hotkey: hotkeyInput.value.trim()
         };
@@ -305,7 +305,7 @@
         await window.appAPI.saveConfig(config);
         showStatus('Settings saved successfully!', 'success');
 
-        setTimeout(() => {
+        setTimeout((): void => {
           window.close();
         }, 1500);
       } catch (error) {
@@ -315,12 +315,12 @@
     });
 
     // Handle quit button
-    quitBtn.addEventListener('click', () => {
+    quitBtn.addEventListener('click', (): void => {
       window.appAPI.quitApp();
     });
 
     // Show status message
-    function showStatus(message, type) {
+    function showStatus(message: string, type: 'success' | 'error'): void {
       statusMessage.textContent = message;
       statusMessage.className = `status-message status-${type}`;
     }

@@ -2,13 +2,15 @@
   "name": "latin-cyrillic-switcher",
   "version": "1.0.0",
   "description": "Latin to Cyrillic text converter with hotkey support",
-  "main": "main.js",
+  "main": "dist/main.js",
   "homepage": "./",
   "scripts": {
-    "start": "electron .",
-    "build": "electron-builder",
-    "build:mac": "electron-builder --mac",
-    "build:dmg": "electron-builder --mac dmg"
+    "build:ts": "tsc",
+    "start": "npm run build:ts && electron .",
+    "dev": "npm run build:ts && electron . --inspect=5858",
+    "build": "npm run build:ts && electron-builder",
+    "build:mac": "npm run build:ts && electron-builder --mac",
+    "build:dmg": "npm run build:ts && electron-builder --mac dmg"
   },
   "build": {
     "appId": "com.latin-cyrillic.switcher",
@@ -41,8 +43,7 @@
       ]
     },
     "files": [
-      "main.js",
-      "preload.js",
+      "dist/",
       "index.html",
       "assets/",
       "node_modules/"
@@ -52,8 +53,11 @@
     "electron-store": "^8.2.0"
   },
   "devDependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/node": "^20.0.0",
     "electron": "latest",
-    "electron-builder": "latest"
+    "electron-builder": "latest",
+    "typescript": "^5.3.0"
   },
   "author": "",
   "license": "MIT"
