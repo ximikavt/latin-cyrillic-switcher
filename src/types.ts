@@ -1,11 +1,11 @@
 /**
- * Configuration types and defaults
+ * Configuration types
  */
 
-export interface AppConfig {
+export type AppConfig = {
   enabled: boolean;
   hotkey: string;
-}
+};
 
 export interface ConvertResult {
   success: boolean;
@@ -15,8 +15,3 @@ export interface ConvertResult {
 export interface ConfigResult {
   success: boolean;
 }
-
-export const DEFAULT_CONFIG: AppConfig = {
-  enabled: true,
-  hotkey: 'Shift+Cmd+L',
-};

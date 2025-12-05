@@ -13,7 +13,12 @@
     "dev": "npm run build && electron . --inspect=5858",
     "build:app": "npm run build && electron-builder",
     "build:mac": "npm run build && electron-builder --mac",
-    "build:dmg": "npm run build && electron-builder --mac dmg"
+    "build:dmg": "npm run build && electron-builder --mac dmg",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "format": "prettier --write src/**/*.ts index.html"
   },
   "build": {
     "appId": "com.latin-cyrillic.switcher",
@@ -55,11 +60,19 @@
     "electron-store": "^11.0.2"
   },
   "devDependencies": {
-    "@types/electron": "^1.6.12",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
     "electron": "^39.2.5",
     "electron-builder": "^26.0.12",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "jest": "^30.2.0",
+    "prettier": "^3.7.4",
     "sass": "^1.94.2",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },
   "author": "",

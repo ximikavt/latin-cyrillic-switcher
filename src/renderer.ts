@@ -22,7 +22,7 @@ function waitForAppAPI(): Promise<typeof window.appAPI> {
       resolve(window.appAPI);
       return;
     }
-    
+
     // Wait for appAPI to be injected
     const checkInterval = setInterval((): void => {
       if (typeof window.appAPI !== 'undefined') {
@@ -31,7 +31,7 @@ function waitForAppAPI(): Promise<typeof window.appAPI> {
         resolve(window.appAPI);
       }
     }, 50);
-    
+
     // Timeout after 5 seconds
     setTimeout((): void => {
       clearInterval(checkInterval);
@@ -76,9 +76,10 @@ async function handleFormSubmit(e: Event): Promise<void> {
     const api = await waitForAppAPI();
     const config = {
       enabled: enabledCheckbox.checked,
-      hotkey: hotkeyInput.value.trim()
+      hotkey: hotkeyInput.value.trim(),
     };
 
+    // Validate hotkey
     if (!config.hotkey) {
       showStatus('Please enter a hotkey combination', 'error');
       return;
@@ -115,11 +116,11 @@ async function handleQuitClick(): Promise<void> {
  */
 function initialize(): void {
   console.log('Initializing application...');
-  
+
   // Set up event listeners
   form.addEventListener('submit', (e: Event) => handleFormSubmit(e));
   quitBtn.addEventListener('click', () => handleQuitClick());
-  
+
   // Load initial configuration
   loadConfig();
 }

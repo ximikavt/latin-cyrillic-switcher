@@ -10,16 +10,23 @@ import {
   nativeImage,
 } from 'electron';
 import path from 'path';
-import Store from 'electron-store';
+import ElectronStore from 'electron-store';
 
-import { AppConfig, ConvertResult, ConfigResult, DEFAULT_CONFIG } from './types';
+import { AppConfig, ConvertResult, ConfigResult } from './types';
 import { convertText } from './converter';
 import { getSelectedText, pasteText } from './systemUtils';
+import { DEFAULT_CONFIG } from './config';
+import { mergeConfigWithDefaults } from './configUtils';
 
-// Store configuration
-const store = new Store<AppConfig>({
+// Store configuration - type assertion needed due to Conf base class type resolution
+interface TypedStore<T> {
+  get<K extends keyof T>(key: K): T[K] | undefined;
+  set<K extends keyof T>(key: K, value: T[K]): void;
+}
+
+const store = new ElectronStore<AppConfig>({
   defaults: DEFAULT_CONFIG,
-});
+}) as ElectronStore<AppConfig> & TypedStore<AppConfig>;
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -28,10 +35,9 @@ let tray: Tray | null = null;
  * Get current configuration
  */
 function getConfig(): AppConfig {
-  return {
-    enabled: (store as any).enabled ?? DEFAULT_CONFIG.enabled,
-    hotkey: (store as any).hotkey ?? DEFAULT_CONFIG.hotkey,
-  };
+  const enabled = store.get('enabled');
+  const hotkey = store.get('hotkey');
+  return mergeConfigWithDefaults({ enabled, hotkey });
 }
 
 /**
@@ -61,9 +67,7 @@ function registerHotkey(hotkey: string): void {
       handleHotkey();
     });
 
-    if (registered) {
-      console.log('Hotkey registered:', hotkey);
-    } else {
+    if (!registered) {
       console.error('Failed to register hotkey:', hotkey);
     }
   } catch (error) {
@@ -84,14 +88,13 @@ const createConfigWindow = (): void => {
     alwaysOnTop: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
+      nodeIntegration: true,
       contextIsolation: true,
       sandbox: false,
     },
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.webContents.openDevTools();
 
   mainWindow.once('ready-to-show', () => {
     if (mainWindow) {
@@ -191,7 +194,7 @@ app.on('will-quit', () => {
 });
 
 // IPC handlers for configuration
-ipcMain.handle('get-config', async (_event: IpcMainInvokeEvent): Promise<AppConfig> => {
+ipcMain.handle('get-config', async (): Promise<AppConfig> => {
   return getConfig();
 });
 
@@ -201,8 +204,9 @@ ipcMain.handle(
     const currentConfig = getConfig();
     const oldHotkey: string = currentConfig.hotkey;
 
-    (store as any).enabled = config.enabled;
-    (store as any).hotkey = config.hotkey;
+    // Persist updated config using electron-store
+    store.set('enabled', config.enabled);
+    store.set('hotkey', config.hotkey);
 
     if (config.hotkey !== oldHotkey) {
       registerHotkey(config.hotkey);
@@ -212,20 +216,17 @@ ipcMain.handle(
   }
 );
 
-ipcMain.handle('convert-text', async (_event: IpcMainInvokeEvent, text: string): Promise<string> => {
+ipcMain.handle('convert-text', async (_event, text: string): Promise<string> => {
   return convertText(text);
 });
 
-ipcMain.handle(
-  'paste-converted',
-  async (_event: IpcMainInvokeEvent, text: string): Promise<ConvertResult> => {
-    const converted: string = convertText(text);
-    clipboard.writeText(converted);
-    return { success: true, converted };
-  }
-);
+ipcMain.handle('paste-converted', async (_event, text: string): Promise<ConvertResult> => {
+  const converted: string = convertText(text);
+  clipboard.writeText(converted);
+  return { success: true, converted };
+});
 
-ipcMain.handle('quit-app', async (_event: IpcMainInvokeEvent): Promise<ConfigResult> => {
+ipcMain.handle('quit-app', async (): Promise<ConfigResult> => {
   app.quit();
   return { success: true };
 });

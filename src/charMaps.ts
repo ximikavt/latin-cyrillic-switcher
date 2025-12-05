@@ -12,7 +12,7 @@ export const latinToCyrillic: CharacterMapping = {
   '!': '!',
   '@': '"',
   '#': '№',
-  '$': ';',
+  $: ';',
   '%': '%',
   '^': ':',
   '&': '?',
